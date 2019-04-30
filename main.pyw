@@ -42,8 +42,18 @@ class Player(pygame.sprite.Sprite):
     update sprite position
     '''
     def update(self):
+        """logic for keeping player on screen"""
         self.rect.x = self.rect.x + self.movex
+        if self.rect.x < 0:
+            self.rect.x = 0
+        elif self.rect.x > (worldx - self.image.get_rect().size[0]):
+            self.rect.x = worldx - self.image.get_rect().size[0]
+
         self.rect.y = self.rect.y + self.movey
+        if self.rect.y < 0:
+            self.rect.y = 0
+        elif self.rect.y > (worldy - self.image.get_rect().size[1]):
+            self.rect.y = worldy - self.image.get_rect().size[1]
 
         if self.movex < 0:
             self.frame += 1
@@ -88,8 +98,8 @@ backdropbox = world.get_rect()
 player = Player()
 player_list = pygame.sprite.Group()
 player_list.add(player)
-stepx = 5
-stepy = 5
+stepx = 3
+stepy = 3
 player.rect.x = 50
 player.rect.y = 50
 player_list = pygame.sprite.Group()
@@ -98,14 +108,14 @@ player_list.add(player)
 '''
 Main Loop
 '''
-next_tick = time.clock()
-last_tick = time.clock()
-frame_clock = time.clock()
+next_tick = time.perf_counter()
+last_tick = time.perf_counter()
+frame_clock = time.perf_counter()
 frame_counter = 0
-while main == True:
+while main:
     ### Setting current time to track the amount of time passed between
     ### program loops to determine timing for each frame
-    current_time = time.clock()
+    current_time = time.perf_counter()
     ### Changed pygame.event.get() to poll for specific events 
     ### (quit, keydown, keyup) rather than all possible events
     events = pygame.event.get([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
@@ -117,30 +127,22 @@ while main == True:
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT or event.key == ord('a'):
-                print('left')
                 player.control(-stepx, 0)
             if event.key == pygame.K_RIGHT or event.key == ord('d'):
-                print('right')
                 player.control(stepx, 0)
             if event.key == pygame.K_UP or event.key == ord('w'):
-                print('up')
                 player.control(0, -stepy)
             if event.key == pygame.K_DOWN or event.key == ord('s'):
-                print('down')
                 player.control(0, stepy)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == ord('a'):
-                print('left')
                 player.control(stepx, 0)
             if event.key == pygame.K_RIGHT or event.key == ord('d'):
-                print('right')
                 player.control(-stepx, 0)
             if event.key == pygame.K_UP or event.key == ord('w'):
-                print('up')
                 player.control(0, stepy)
             if event.key == pygame.K_DOWN or event.key == ord('s'):
-                print('down')
                 player.control(0, -stepy)
             if event.key == ord('q'):
                 pygame.quit()
@@ -161,7 +163,7 @@ while main == True:
         player_list.draw(world) ## The player is being drawn to the background
         ### Update the screen to display what is on the screen surface
         pygame.display.flip()
-        last_tick = time.clock()
+        last_tick = time.perf_counter()
     else:
         ## Sleep until the game needs to be updated next frame
         time.sleep(next_tick-current_time)
@@ -169,4 +171,4 @@ while main == True:
     if current_time-frame_clock >= 1:
         pygame.display.set_caption('FPS: '+str(frame_counter))
         frame_counter = 0
-        frame_clock = time.clock()
+        frame_clock = time.perf_counter()
